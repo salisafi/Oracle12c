@@ -1,0 +1,30 @@
+
+
+-- Constnts in plsql programming language - user defined identifier which values stay the same during the execution of the program
+
+
+-- They must be daclared in the DECLARE section of the plsql before their use
+
+--  Syntax  :  <<<<   constant_name CONSTANT datatypr(dw) := VALUE;   >>>>
+
+-- ***  Constants MUST be initialized at their declaration time
+
+
+
+-------------------
+
+SET SERVEROUTPUT ON;
+
+DECLARE 
+    c_PI CONSTANT NUMBER(6,5) := 3.14159;
+    v_circle_area NUMBER(6,3);
+BEGIN
+
+    v_circle_area := c_PI * (10 * 10);
+    DBMS_OUTPUT.PUT_LINE('Area of a CIRCLE with 10 radius is ' || v_circle_area);
+END;
+/
+
+
+Output: Area of a CIRCLE with 10 radius is 314.159
+-------------------

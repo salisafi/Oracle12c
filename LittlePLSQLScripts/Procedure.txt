@@ -1,0 +1,104 @@
+
+-- Procedures are named PL/SQL blocks which are self-contained sub-programs that are supposed to do onething well.
+
+-- Stored procedures are saved in database and can be called from anywhere in the program
+
+-- PL/SQL Stored Procedures can return zero or more value to their calling environment 
+
+-- Unlike Functions, they do not use explicit RETURN statement but using OUT, IN OUT parameter modes let us pass values to call environment
+
+-- Syntax for stored procedures without any parameters: 
+
+-- CREATE [OR REPLACE] PROCEDURE proc_name (
+--    parameter_name1 datatype1,
+--    parameter_name2 datatype2,
+--    ....
+--    )       IS 
+--   declare statements
+--  BEGIN
+--    executable statements
+--  END procedure_name;
+--  /
+
+ 
+-- How to create stored procedures in PL/SQL
+
+CREATE OR REPLACE PROCEDURE pro_name
+IS
+    var_name VARCHAR2(20) := 'Sali Safi';
+    var_business_name VARCHAR2(20) := 'SSAFI INC.';
+    
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('What s  up Enterner? ' || var_name || ' is here from ' || var_business_name);
+END;
+/
+
+Output : Procedure PRO_NAME compiled
+
+
+To run the procedure:
+
+-- 1.     SET SERVEROUTPUT ON;
+          EXECUTE pro_name;
+
+-- 2.    BEGIN
+             PRO_NAME();
+
+         END;
+
+
+-- 3.   BEGIN
+  		PRO_NAME;
+		--rollback; 
+	END;
+ 
+--  *** Can not use a procedure as a right hand operator of an assignment operator to give it's value to a variable - Unlike FUNCTION
+-- It means values return from a procedure can not be assigned into a variable
+
+
+----------------------------------------------------
+
+
+-- Creating a parametarized procedure
+
+CREATE OR REPLACE PROCEDURE emp_sal_raise(
+    dep_id NUMBER,
+    sal_raise NUMBER)
+IS 
+BEGIN 
+    UPDATE Employees SET salary = salary * sal_raise
+    WHERE department_id = dep_id;
+END;
+/
+
+
+Entered:
+		SELECT * FROM EMPLOYEES
+		WHERE Department_id = 100;
+
+Output :
+
+108	Nancy	Greenberg	NGREENBE	515.124.4569	94-08-17	FI_MGR	12000
+109	Daniel	Faviet	DFAVIET	515.124.4169	94-08-16	FI_ACCOUNT	9000
+110	John	Chen	JCHEN	515.124.4269	97-09-28	FI_ACCOUNT	8200
+111	Ismael	Sciarra	ISCIARRA	515.124.4369	97-09-30	FI_ACCOUNT	7700
+112	Jose Manuel	Urman	JMURMAN	515.124.4469	98-03-07	FI_ACCOUNT	7800
+113	Luis	Popp	LPOPP	515.124.4567	99-12-07	FI_ACCOUNT	6900
+
+
+Entered : 
+
+SET SERVEROUTPUT ON;
+EXECUTE emp_sal_raise(100, 5);
+
+
+Output:  
+
+108	Nancy	Greenberg	NGREENBE	515.124.4569	94-08-17	FI_MGR	60000
+109	Daniel	Faviet	DFAVIET	515.124.4169	94-08-16	FI_ACCOUNT	45000
+110	John	Chen	JCHEN	515.124.4269	97-09-28	FI_ACCOUNT	41000
+111	Ismael	Sciarra	ISCIARRA	515.124.4369	97-09-30	FI_ACCOUNT	38500
+112	Jose Manuel	Urman	JMURMAN	515.124.4469	98-03-07	FI_ACCOUNT	39000
+113	Luis	Popp	LPOPP	515.124.4567	99-12-07	FI_ACCOUNT	34500
+
+-------------------------------------------

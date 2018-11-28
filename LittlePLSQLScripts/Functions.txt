@@ -1,0 +1,55 @@
+
+-- Functions are named PL/SQL blocks - self contained sub_program to do some specific tasks
+
+--  PL/SQL Functions can be saved in database and reused - Stored Functions
+
+--  Syntax : 
+
+-- CREATE [OR REPLACE] FUNCTION function_name(
+--  parameter1, 
+--  parameter2
+-- ) RETURN return_type
+-- 
+-- DECLARE variable, constant,...;
+
+-- BEGIN
+--   EXECUTABLE statements
+-- ...
+-- RETURN value;
+-- END;
+-- /
+
+
+----------------------------
+-- *****  No DECLARE section is required
+
+
+
+    CREATE OR REPLACE FUNCTION circle_area(radius NUMBER)
+    RETURN NUMBER IS -- Functions must have 1 explicit return statement
+    
+    c_PI CONSTANT NUMBER(7, 4) := 3.1415;
+    v_area NUMBER(7, 4);
+    
+BEGIN
+    v_area := c_PI * radius * radius;
+    DBMS_OUTPUT.PUT_LINE(v_area);
+    
+    RETURN v_area;
+END;
+/
+
+Output:  Function CIRCLE_AREA compiled
+
+----------------
+
+BEGIN
+     DBMS_OUTPUT.PUT_LINE(circle_area(10));
+END;
+/
+
+Output:  314.15
+
+
+---------------------------------------
+

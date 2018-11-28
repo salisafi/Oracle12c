@@ -1,0 +1,256 @@
+
+-- Cursor is always associated with a select statement
+
+-- Cursor is a pointer to a memory area called context area. 
+
+--  Context area is a memory region inside the Proccess Globa Area or PGA
+
+-- Context area holds the information about the result of DML and queries
+
+-- 1. Rows returned by a query 
+
+-- 2. Number of rows processed/effected by a query
+
+-- 3. A pointer to the parsed query in the shared pool
+
+
+
+-- Types of cursors in PLSQL
+
+-- 1. Implicit cursors which are created by Oracle server for every PL/SQL statement
+--  as long as explicit cursor does not exist for that statement
+ 
+-- 2. Explicit cursors - user must explicitly define explicit cursor for every PL/SQL statement 
+--    that returns more than one result
+
+-- To create an explicit Cursors user must follow 4 steps:
+
+--  1. Declare the explicit cursor in DECLARE section - initializing a cursor to the memory 
+
+--  2. Open the  cursor
+
+--  3. Fetch data using Query statement into a PL/SQL variables or RECORD
+
+--  4. Close the cursor - server will relinquish all the resources associated with the cursor
+
+-------------------------------------
+--   DECLARE 
+--     CURSOR   cur_name IS SELECT_statement
+
+--   BEGIN
+--      OPEN cur_name
+--      FETCH cur_name
+--      CLOSE cur_name
+--   END;
+
+--------------------------------------
+
+Below code gives you error because the query returns more than one record
+
+
+SET SERVEROUTPUT ON;
+
+DECLARE 
+    v_first_name Student.first_name%TYPE;
+    v_last_name Student.last_name%TYPE;
+    
+BEGIN
+   SELECT first_name, last_name
+   INTO v_first_name, v_last_name
+   FROM Student
+   WHERE student_id > 300;
+END;
+/
+
+ERROR:  
+Error report -
+ORA-01422: exact fetch returns more than requested number of rows
+ORA-06512: at line 6
+
+-----------------------------
+
+
+SET SERVEROUTPUT ON;
+
+    
+DECLARE 
+    v_fname Student.first_name%TYPE;
+    v_lname Student.last_name%TYPE;
+
+
+CURSOR cur_name IS 
+    SELECT first_name, last_name
+    FROM Student
+    WHERE student_id > 70;
+    
+BEGIN
+
+    OPEN cur_name;
+    LOOP
+        FETCH cur_name INTO v_fname, v_lname;
+        DBMS_OUTPUT.PUT_LINE('The student is ' || v_fname || ' ' || v_lname);
+        EXIT WHEN cur_name%NOTFOUND;
+    END LOOP;
+    CLOSE cur_name;
+END;
+/
+
+Output : 
+The student is Craig Anglin
+The student is Zalman Draquez
+The student is Reeva Yeroushalmi
+The student is Leonard Millstein
+The student is Jack Kasperovich
+The student is Lorelei McNeal
+The student is William Gallo
+The student is Craig Padron
+The student is Joel Krot
+The student is Allan Simmons
+The student is Michael Miroff
+The student is Roger Cowie
+The student is Asian Chirichella
+The student is Yvonne Allende
+The student is Sengita MacDonald, Jr.
+The student is Paul Braun
+The student is Anna Bathmanapan
+The student is Shirley Leung
+The student is V. Greenberg
+The student is Rafael A. Torres
+The student is V. Saliternan
+The student is Melvin Martin
+The student is Vera Wetcel
+The student is James E. Norman
+The student is Margaret Lloyd
+The student is Jerry Abdou
+The student is Jerry Abdou
+
+-------------------------------------
+
+-- %NOTFOUND is a cursor boolean to check any more row retrieved - true if the previous FETCH did not return a row
+
+--------------------------
+
+-- Parametarized cursors with DEFAULT value
+
+SET SERVEROUTPUT ON;
+
+ACCEPT stu_id PROMPT 'Enter student id to see student info '
+
+DECLARE 
+ 
+ v_stu_id NUMBER := &stu_id;
+CURSOR cur_name(stu_id NUMBER := 370) IS 
+    SELECT first_name, last_name
+    FROM Student 
+    WHERE Student_id > v_stu_id;
+    
+    v_stu_fname Student.first_name%TYPE;
+    v_stu_lname Student.last_name%TYPE;
+    
+    v_num_row_retrieved NUMBER(3);
+    
+BEGIN
+    OPEN cur_name(v_stu_id);
+    LOOP
+        FETCH cur_name INTO v_stu_fname, v_stu_lname;
+        DBMS_OUTPUT.PUT_LINE('YOU choose ' || v_stu_fname || ' ' || v_stu_lname );
+        EXIT WHEN cur_name%NOTFOUND;
+    END LOOP;
+    CLOSE cur_name;
+    
+    SELECT COUNT(first_name)
+    INTO v_num_row_retrieved
+    FROM Student 
+    WHERE Student_id > v_stu_id;
+    
+    DBMS_OUTPUT.PUT_LINE('Total findings ' || v_num_row_retrieved );
+END;
+/
+
+Entered : 380
+
+Output:
+
+YOU choose Allan Simmons
+YOU choose Michael Miroff
+YOU choose Roger Cowie
+YOU choose Asian Chirichella
+YOU choose Yvonne Allende
+YOU choose Sengita MacDonald, Jr.
+YOU choose Paul Braun
+YOU choose Anna Bathmanapan
+YOU choose Shirley Leung
+YOU choose V. Greenberg
+YOU choose Rafael A. Torres
+YOU choose V. Saliternan
+YOU choose Melvin Martin
+YOU choose Vera Wetcel
+YOU choose James E. Norman
+YOU choose Margaret Lloyd
+YOU choose Jerry Abdou
+YOU choose Jerry Abdou
+Total findings 17
+
+---------------------------------
+
+-- Cursor For-Loop
+
+--Do not need to open, fetch and close explicitly
+
+-- FOR loop_index IN cursor_name
+--   LOOP
+--	statements;
+--   END LOOP;
+ 
+-----------------------------------------------   For-Loop
+
+-- Using for-loop :
+--  1. No need to open cursor
+--  2. No need to fetch rows explicitly
+--  3. No need to declare local variables to put fetched data inside
+--  4. No need to close the cursor explicitly
+--  5. No need to define lower and higher range for the for-loop
+
+SET SERVEROUTPUT ON;
+
+ACCEPT stu_id PROMPT 'Enter the largest student id to see student info '
+
+DECLARE 
+    v_stu_id NUMBER(3) := &stu_id;
+
+    CURSOR cur_name(p_stu_id NUMBER) IS 
+    SELECT first_name, last_name
+    FROM Student 
+    WHERE student_id > v_stu_id;
+    
+BEGIN
+    FOR i IN cur_name(v_stu_id)
+        LOOP 
+            DBMS_OUTPUT.PUT_LINE(i.first_name || i.last_name);
+    END LOOP;
+END;
+/
+
+Entered : 380
+
+Output:
+AllanSimmons
+MichaelMiroff
+RogerCowie
+AsianChirichella
+YvonneAllende
+SengitaMacDonald, Jr.
+PaulBraun
+AnnaBathmanapan
+ShirleyLeung
+V.Greenberg
+Rafael A.Torres
+V.Saliternan
+MelvinMartin
+VeraWetcel
+James E.Norman
+MargaretLloyd
+JerryAbdou
+
+
+--------------------------------------------------

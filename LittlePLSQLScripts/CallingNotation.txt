@@ -1,0 +1,115 @@
+
+-- Types of calling notations:
+
+--   1. Positional Notation  - specify the value for each formal parameter in a sequentual manner when calling that function or procedure
+
+--   2. Named Notation - lets you pass values to only mandatory(NOT NULL) parameters by using the formal parameters and association operator " => "
+
+--   3. Mixed Calling Notation - l
+
+
+----------------------------------   1. Positional Notation
+
+
+
+
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE emp_sal_raise(
+    dep_id NUMBER,
+    sal_raise NUMBER)
+IS 
+BEGIN 
+    UPDATE Employees SET salary = salary * sal_raise
+    WHERE department_id = dep_id;
+    
+     DBMS_OUTPUT.PUT_LINE('Salary is updated successfully!!!');
+     
+END;
+/
+
+
+Output :   
+		Procedure EMP_SAL_RAISE compiled
+
+
+Entered:        SELECT * FROM EMPLOYEES
+		WHERE department_id = 90;
+
+
+Output : 
+
+100	Steven	King	SKING	515.123.4567	87-06-17	AD_PRES	24000
+101	Neena	Kochhar	NKOCHHAR	515.123.4568	89-09-21	AD_VP	17000
+102	Lex	De Haan	LDEHAAN	515.123.4569	93-01-13	AD_VP	17000
+
+
+	
+
+SET SERVEROUTPUT ON;
+EXECUTE emp_sal_raise(90, 5);  -- Actual parameters
+
+Output :   
+
+100	Steven	King	SKING	515.123.4567	87-06-17	AD_PRES	120000
+101	Neena	Kochhar	NKOCHHAR	515.123.4568	89-09-21	AD_VP	85000
+102	Lex	De Haan	LDEHAAN	515.123.4569	93-01-13	AD_VP	85000
+
+
+-----------------------------------------   2. Named Notation 
+
+
+CREATE OR REPLACE FUNCTION add_nums(
+    num1 NUMBER,
+    num2 NUMBER := 0,
+    num3 NUMBER)
+RETURN NUMBER
+IS 
+
+BEGIN 
+     --   v_result NUMBER(3) := 0; -- Error - no DECLARE section in FUNCTION and PROCEDURE????
+        
+     DBMS_OUTPUT.PUT_LINE('Number 1 is : ' || num1);
+     DBMS_OUTPUT.PUT_LINE('Number 2 is : ' || num2);
+     DBMS_OUTPUT.PUT_LINE('Number 3 is : ' || num3);
+
+ --   v_result = num1+num2+num3;
+     
+  --   DBMS_OUTPUT.PUT_LINE('Addition of numbers is ' || v_result);
+     
+     RETURN num1+num2+num3;
+END;
+/
+
+Entered:
+
+BEGIN
+   DBMS_OUTPUT.PUT_LINE(add_nums(num3 =>5, num1=>2, num2=>9));
+--rollback; 
+END;
+
+Output:  
+
+Number 1 is : 2
+Number 2 is : 9
+Number 3 is : 5
+16
+
+
+
+--************
+
+BEGIN
+   DBMS_OUTPUT.PUT_LINE(add_nums(num3 =>5, num1=>9));
+--rollback; 
+END;
+
+Output: 
+
+Number 1 is : 9
+Number 2 is : 0  -- comes from the DEFAULT
+Number 3 is : 5
+14
+
+
+------------------------------

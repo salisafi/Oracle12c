@@ -1,0 +1,123 @@
+
+-- Packages are stored libraries which are logical groups of related PL/SQL objects.
+
+-- Packages are named PL/SQL blocks that are saved in database schema
+
+-- Packages can be referenced or reused by other people and programs
+
+-- Packages can contain - package elements :
+
+-- 1. Stored procedures
+
+-- 2. Stored functions
+
+-- 3. Database cursors
+
+-- 4. Type declarations
+
+-- 5. Variables
+
+
+---- Packages have 2 main parts :
+
+--- 1. Specification(Spec) - header section of the package - " Mandatory " - " Public "
+
+-- All the package elements are going to be declared here 
+
+-- Daclared elements here are publically available from outside of the package
+
+-- The specificatin of a package gives developer Interface to functionalities and abilities of the package
+
+
+--- 2. Body of the package - " Optional " - contains the implementation and complexity of the interface and is " Private "
+
+-- Any package elements which are not mentioned 
+
+-- Syntax of package header:
+
+-- CREATE OR REPLACE PACKAGE pkg_name IS 
+--    Declaration of all the package elements ...;
+--  END [package_name];
+
+
+--- **** DO NOT USE " DECLARE " KEYWORD IN PROCEDURES, FUNCTIONS AND PACKAGES -- ONLY ANNONYMOUS BLOCK USES " DECLARE " SECTION
+
+-- Syntax of package body:
+
+-- CREATE OR REPLACE PACKAGE BODY package_name IS --*** Look at BODY
+--    variable declaration ..;
+--    type_declaration;
+
+--  BEGIN
+--   implamentation of the package elements
+
+-- END [package_name];
+--  /
+
+
+------- *********  Package header and package body are stored separately in the database therefore they can be referenced and compile separatly
+
+-- PL/SQL Package creation syntax :
+
+
+-- 1. Package header
+
+---------------
+
+CREATE OR REPLACE PACKAGE pkg_prt_str IS 
+    
+    FUNCTION prt_str RETURN VARCHAR2;
+
+    PROCEDURE proc_sup(f_name VARCHAR2, l_name VARCHAR2);
+
+END pkg_prt_str;
+/
+
+-------------
+
+
+
+-- Lets create a simple package which contains a procedure and a function
+
+-- Let's start by creating the header of the package
+
+
+-- 2. Package body
+
+-- This package has two elements
+CREATE OR REPLACE PACKAGE BODY pkg_prt_str IS 
+
+-- 1. PL/SQL Function - Function body implementation
+    FUNCTION prt_str RETURN VARCHAR2 IS
+        BEGIN 
+            RETURN 'HI';
+        END prt_str;
+        
+-- 2. PL/SQL Stored Procedure - procedure implementation
+    PROCEDURE proc_superhero (f_name VARCHAR2, l_name VARCHAR2) IS
+        BEGIN 
+            DBMS_OUTPUT.PUT_LINE('Values for first name is ' || f_name || 'Value for the second name is ' || l_name);
+        END proc_superhero;
+END pkg_prt_str;
+/
+
+-------------------------------  How to call the function and procedures inside the package
+
+-- Run the function inside the package
+SET SERVEROUTPUT ON;
+
+BEGIN
+   DBMS_OUTPUT.PUT_LINE(pkg_prt_str.prt_str);
+--rollback; 
+END;
+
+
+Output: HI
+
+-- Run the procedure inside the package
+EXECUTE pkg_prt_str.proc_superhero('Samaneh', 'Mohammadi');
+
+Output:
+Values for first name is SamanehValue for the second name is Mohammadi
+
+

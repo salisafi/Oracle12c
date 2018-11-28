@@ -1,0 +1,23 @@
+
+-- Oracle alias is different from SQL which is  Stud_name AS [Student Name] 
+
+-- In Oracle : <<<<  Stud_name AS "Student Name" 
+
+-- [] square bracket is replaced with " " double-quate for aliases
+
+
+--------------------
+
+SELECT stu_id AS "Student Number", first_name AS "Student Name" FROM StudentTest;
+
+
+Output:
+
+Student Number		Student Name
+4			Ava
+1			Sima
+2			Sara
+3			Soheil
+5			Sali
+
+--------------------------

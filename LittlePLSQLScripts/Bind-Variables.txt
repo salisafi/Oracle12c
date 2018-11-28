@@ -1,0 +1,134 @@
+
+-- Bind variables also known as "host variables"
+
+-- Unlike user defined regular variables which need to be defined inside the DECLARE section of the block, 
+-- bind variables are defined before the code block and therefore they have sort of global scoping - similar to "Static" access type
+-- bind variables can be defined anywhere in the host environment of a code block
+
+-- Ways to declare :  
+--                       <<<<   VARIABLE v_bind VARCHAR2(20);   >>>>
+
+-- No need to initialize at declaration time
+
+-- Ways to initialization  
+
+--                      1. <<<  EXECUTE :v_bind := "Food is ..."  >>>  
+
+--                       2. Using simple execution block of plsql  <<<   BEGIN 
+                                                                             :v_bind := 'Food is ...';
+									   END;
+						 			    /
+							           >>>
+
+--  **** "  :  " is required to derefrence a bind variable in the code block
+
+-- Ways to print bind variables :  
+
+			1. <<<<    DBMS_OUTPUT.PUT_LINE(:v_bind);      >>>>
+			
+			2. PRINT command  -  <<<<<          PRINT :v_bind;   >>>>>>>
+			
+			3. Turn on " AUTOPRINT " then all the bind variable values will be printed  <<<<    SET AUTOPRINT ON;  >>>>
+
+------------------------
+
+
+1.
+
+
+SET SERVEROUTPUT ON;
+
+VARIABLE v_bind VARCHAR2(20)    -- ***
+EXECUTE :v_bind := 'Food is ...';  -- ***** Initializing bind variable using " EXECUTE " MUST come before declaration section
+
+DECLARE 
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE(:v_bind);
+END;
+/
+
+Output: Food is ...
+
+---------------------
+
+
+2.
+
+
+SET SERVEROUTPUT ON;
+
+VARIABLE v_bind VARCHAR2(20)
+EXECUTE :v_bind := 'Food is ...';
+                                          NO BEGIN, no body code
+END;                          
+
+PRINT v_bind      -- *****  no ;
+/
+
+Output :  
+ V_BIND
+--------------------------------------------------------------------------------
+Food is ...
+
+
+-----------------------
+
+
+2. Using "  PRINT;  " command without any bind variable name, will print the values of all the bind variables in the code block
+
+
+SET SERVEROUTPUT ON;
+
+VARIABLE v_bind VARCHAR2(20)
+EXECUTE :v_bind := 'Food is ...';
+
+VARIABLE v_bind2 VARCHAR2(20)
+EXECUTE :v_bind := 'Food is very good here';
+
+END;
+
+PRINT;
+/
+
+Output : 
+  
+V_BIND
+--------------------------------------------------------------------------------
+Food is ...
+
+V_BIND2
+--------------------------------------------------------------------------------
+
+
+
+-----------------
+
+3. Using "  SET AUTOPRINT ON;   -- ****  NO code block is really required
+
+
+SET SERVEROUTPUT ON;
+
+SET AUTOPRINT ON;  -- ****
+
+VARIABLE v_bind VARCHAR2(20)
+EXECUTE :v_bind := 'Food is ...';
+
+VARIABLE v_bind2 VARCHAR2(20)
+EXECUTE :v_bind := 'Food is very good';
+
+
+Output : 
+
+V_BIND
+-----------
+Food is ...
+
+PL/SQL procedure successfully completed.
+
+V_BIND
+-----------------
+Food is very good
+
+
+

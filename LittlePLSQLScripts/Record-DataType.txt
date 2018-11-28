@@ -1,0 +1,120 @@
+
+-- Record DataType - %ROWTYPE
+
+-- Syntax : 
+
+-- 1.  variable_name table_name%ROWTYPE;
+
+-- 2.  variable_name cursor_name%ROWTYPE;
+
+
+-- Record DataType is somehow similar to anchore datatype - %TYPE
+
+-- Records are composite data type fields inside a row of a table - set of related fields but not exactly same data type
+
+-- Record is a group of related data items stored in fields, each with its own datatype
+
+--   1. Table based record
+
+--   2. Cursor based record
+
+--   3. User defined record
+
+
+----------------------------   1. Table based record
+
+
+
+
+
+----------------------------   2. Cursor based record
+
+
+SET SERVEROUTPUT ON;
+
+DECLARE 
+    
+    CURSOR cur_emp IS 
+    SELECT *
+    FROM Employees
+    WHERE employee_id > 100;
+    
+    rec_emp cur_emp%ROWTYPE; -- cursor based record data type variable
+
+BEGIN
+    OPEN cur_emp;
+    LOOP
+       FETCH cur_emp INTO rec_emp;
+       DBMS_OUTPUT.PUT_LINE(rec_emp.first_name || ' ' || rec_emp.last_name || ' ' || rec_emp.salary);
+       EXIT WHEN cur_emp%NOTFOUND;
+    END LOOP;
+    CLOSE cur_emp;
+END;
+/
+
+Output :
+Alyssa Hutton 8800
+Jonathon Taylor 16758.97
+Jack Livingston 8400
+Kimberely Grant 7000
+Charles Johnson 6200
+Winston Taylor 3200
+Jean Fleaur 3100
+Martha Sullivan 2500
+Girard Geoni 2800
+Nandita Sarchand 4200
+Alexis Bull 4100
+Julia Dellinger 3400
+Anthony Cabrio 3000
+Kelly Chung 3800
+Jennifer Dilly 3600
+Timothy Gates 2900
+Randall Perkins 2500
+Sarah Bell 4000
+Britney Everett 3900
+Samuel McCain 3200
+Vance Jones 2800
+Alana Walsh 3100
+Kevin Feeney 3000
+Kevin Feeney 3000
+ 
+------------------------------------------    3. User defined record
+
+-- Complete control over this type of record
+
+-- TYPE type_name IS RECORD ( 
+--      field_name1 datatype1,
+--      field_name2 datatype2,
+--      ....
+--  );
+
+---   record_name TYPE_NAME;
+
+-- *****  NO more %ROWTYPE
+
+------------------------------
+SET SERVEROUTPUT ON;
+
+DECLARE 
+    TYPE type_dept IS RECORD(
+        f_name Employees.first_name%TYPE,
+        d_name Departments.department_name%TYPE
+    );
+    
+    var1 TYPE_DEPT;
+BEGIN
+   
+   SELECT first_name, department_name INTO var1.f_name, var1.d_name
+   FROM Employees
+   JOIN Departments 
+   USING(department_id)
+   WHERE employee_id = 100;
+   
+    DBMS_OUTPUT.PUT_LINE(var1.f_name || ' ' || var1.d_name);
+END;
+/
+
+
+Output: 
+	Steven Executive
+------------------------

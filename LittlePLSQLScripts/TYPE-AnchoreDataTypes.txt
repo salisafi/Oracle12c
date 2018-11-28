@@ -1,0 +1,48 @@
+
+-- %TYPE  -Anchore datatype 
+
+-- Datatype which you assign to a variable based on a database object
+
+-- They are dynamicaly dependent on their underlying structure 
+
+-- Syntax :        <<<<     variable_name Typed-attribute%TYPE;   >>>>
+
+-- Type can be a previously defined PLSQL variable or a field of a table
+
+-- %TYPE is a direct reference to an underlying database object
+
+
+-------------------
+
+-- First I create a new table called StudentTest then Inserted some values to it one by one
+
+
+CREATE TABLE StudentTest( 
+stu_id  NUMBER(2),
+first_name VARCHAR2(10));
+
+INSERT INTO StudentTest
+VALUES
+(5, 'Sali');
+
+SELECT stu_id AS "Student num", first_name AS "Student name" FROM StudentTest;
+
+
+-----------------------------------
+
+-- Then created an anchore variable to fetch data from query and use it in the code
+
+
+SET SERVEROUTPUT ON;
+
+DECLARE 
+    v_first_name StudentTest.first_name%TYPE; -- ******
+BEGIN
+    SELECT first_name 
+    INTO v_first_name 
+    FROM StudentTest
+    WHERE stu_id = 5;
+    
+    DBMS_OUTPUT.PUT_LINE('Student name is ' || v_first_name);
+END;
+/

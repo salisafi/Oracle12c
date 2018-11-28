@@ -1,0 +1,166 @@
+
+-- Exception handling in PL/SQL
+
+-- Any abnormal condition at run time which changes/stops the flow of the program execution is called exception
+
+-- Exceptions are run time errors
+
+-- Types of exceptions:
+
+-- 1. System defined exceptions - defined and managed by Oracle server directly
+
+-- 2. User defined exceptions - MUST be raised and handled explicitly in the program
+
+---- 2.  1. Defining user defined exception using EXCEPTION data type object - MUST be RAISED explicitly
+
+---- 2.  2. Defining user defined exception using PRAGMA EXCEPTION_INI function 
+           
+           can map a non-predifined error number to an exception datatype
+
+----- 2. 3.   Defining user defined exception using RAISE_APPLICATION_ERROR method
+	    can define an exception with your own customized error number and error message
+
+
+
+
+-----------------------------
+
+
+2.  1. Using EXCEPTION data type object - MUST be RAISED explicitly
+
+
+--  2. 1. 1.  Declare a variable with datatype EXCEPTION
+
+--  2. 2. 2.  Raise the exception explicitly 
+
+--  2. 2. 3.  Handle the exception explicitly
+
+
+-------------------------------
+
+
+--  2. 1. 1.  Declare a variable with datatype EXCEPTION
+
+
+SET SERVEROUTPUT ON;
+
+-- Annonymous PL/SQL block
+DECLARE  
+    v_dividend NUMBER := 24;
+    v_divisor NUMBER := 0;
+    v_result NUMBER;
+    ex_DivZero EXCEPTION;  -- Defining the exception
+    
+BEGIN
+    IF v_divisor = 0 THEN
+        RAISE ex_DivZero; -- Raising the exception explicitly
+    END IF;
+    
+    v_result := v_dividend / v_divisor;
+    DBMS_OUTPUT.PUT_LINE('Result is ' || v_result); -- **** Since the error hapens any statement after the error is ignored
+    
+    EXCEPTION WHEN ex_DivZero THEN -- Handle the exception
+        DBMS_OUTPUT.PUT_LINE('ERROR:  Invalid divisor. Please use any other number.');
+    
+END;
+/
+
+
+
+Output:
+
+ERROR:  Invalid divisor. Please use any other number.
+
+
+--------------------------  2. 2. 2.  Raise the exception explicitly 
+
+-- Associating an exisitng error message with a user defiened error message
+
+
+
+
+SET SERVEROUTPUT ON;
+
+ACCEPT in_num PROMPT 'Enter a divider '
+
+-- Annonymous PL/SQL block
+DECLARE  
+    v_dividend NUMBER := 24;
+    v_divisor NUMBER := &in_num;
+    v_result NUMBER;
+ --   ex_DivZero EXCEPTION;  -- Defining the exception
+    
+BEGIN
+    IF v_divisor = 0 THEN -- ******  RAISE_APPLICATION_ERROR
+        RAISE_APPLICATION_ERROR(-20020, 'Invalid divisor. Please use any other number.');
+    END IF;
+    
+    v_result := v_dividend / v_divisor;
+    DBMS_OUTPUT.PUT_LINE('Result is ' || v_result);
+   
+   EXCEPTION WHEN others THEN 
+    DBMS_OUTPUT.PUT_LINE(SQLERRM); -- ******  RSQL ERROR MESSAGE
+END;
+/
+
+
+Entered:
+		8
+
+Output:
+		Result is 3
+
+------------
+
+Entered:
+		0
+
+Output:
+		 
+ORA-20020: Invalid divisor. Please use any other number.
+
+-----------------------------------  2. 2. 3.  Using PRAGMA EXCEPTION_INIT method - we want to name our error messages when they happened
+
+-- Using PRAGMA_INIT function exception help us to associate an exception name with an Oracle error number
+
+
+SET SERVEROUTPUT ON;
+
+ACCEPT in_num PROMPT 'Enter a number for age '
+
+-- Annonymous PL/SQL block
+DECLARE  
+    v_age NUMBER := &in_num;
+
+    ex_age EXCEPTION;  -- Defining the exception
+    PRAGMA EXCEPTION_INIT(ex_age, -20020);
+     
+BEGIN
+    IF v_age < 17 THEN -- ******  RAISE_APPLICATION_ERROR
+       RAISE_APPLICATION_ERROR(-20020, 'You should not drink if you are not 18 yet');
+    END IF;
+ 
+  DBMS_OUTPUT.PUT_LINE('What type of drink do you need???');
+  
+   EXCEPTION WHEN others THEN 
+    DBMS_OUTPUT.PUT_LINE(SQLERRM); -- ******  RSQL ERROR MESSAGE
+END;
+/
+
+
+Entered:  16
+
+
+Output:  ORA-20020: You should not drink if you are not 18 yet
+
+
+------
+
+Entered:  58
+
+
+Output: What type of drink do you need???
+
+
+
+

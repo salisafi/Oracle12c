@@ -1,0 +1,14 @@
+
+
+CREATE OR REPLACE PROCEDURE find_stud (
+v_stud_id IN NUMBER, 
+v_last_name OUT VARCHAR2,
+v_phone_num OUT VARCHAR2,
+v_zip_code OUT NUMBER) IS
+
+
+BEGIN
+
+
+END;
+/
