@@ -1,0 +1,405 @@
+DBS501-Practice 4-Sali
+
+
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF;
+
+ACCEPT  cityName  PROMPT 'You may enter city name: '
+DECLARE
+     v_loc_city     Locations.city%TYPE := '&cityName';
+     v_dep_id     Departments.department_id%TYPE;
+     v_dept_name  Departments.department_name%TYPE;
+BEGIN
+        SELECT  Departments.department_id, Departments.department_name, Locations.city  
+        INTO    v_dep_id, v_dept_name, v_loc_city
+        FROM Departments
+        INNER JOIN Locations
+        ON Departments.location_id = Locations.location_id
+        WHERE upper(city)  LIKE '&cityName';
+
+ DBMS_OUTPUT.PUT_LINE('In the choosen city id is ' || v_dep_id || ' and your department is ' || v_dept_name);
+END;
+/
+
+
+
+
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ACCEPT  empnum  PROMPT 'Please provide the employee number: '
+DECLARE
+      emp_rec     Employees%ROWTYPE;
+      v_new_ann_inc   Employees.salary%TYPE;
+BEGIN
+    SELECT first_name, last_name, salary, commission_pct
+    INTO emp_rec
+    FROM Employees
+    WHERE employee_id = &empnum;
+
+     v_new_ann_inc := 12 * emp_rec.salary;
+DBMS_OUTPUT.PUT_LINE('Employee ' || emp_rec.last_name || ' monthly salary of ' || emp_rec.salary || ' has an annual income of ' || v_new_ann_inc);
+
+END;
+/
+
+----- Practice 4 - Q1
+
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ACCEPT  empnum  PROMPT 'Please provide the employee number: '
+DECLARE
+      v_lname     Employees.last_name%TYPE;
+      v_salary      Employees.salary%TYPE;
+      v_commission   Employees.commission_pct%TYPE;
+      v_new_ann_inc   Employees.salary%TYPE;
+BEGIN
+    SELECT last_name, salary, commission_pct
+    INTO v_lname, v_salary, v_commission 
+    FROM Employees
+    WHERE employee_id = &empnum;
+    
+   IF v_commission IS NOT NULL THEN
+     v_commission := 2 * v_commission;
+     v_new_ann_inc := 12 * v_salary * (1+v_commission);
+     ELSE
+      v_new_ann_inc := 12 * v_salary;
+    END IF;
+    
+DBMS_OUTPUT.PUT_LINE('Employee ' || v_lname || ' monthly salary of ' || v_salary || ' has an annual income of ' || v_new_ann_inc);
+
+END;
+/
+
+------ PRACTICE 6-Q1
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ACCEPT  empnum  PROMPT 'Please provide the employee number: '
+
+DECLARE
+      
+      v_emp_rec   Employees%ROWTYPE;
+BEGIN
+    SELECT *
+    INTO v_emp_rec
+    FROM Employees
+    WHERE employee_id = &empnum;
+    
+  INSERT INTO Retired_emps
+  VALUES(v_emp_rec.employee_id, v_emp_rec.last_name, v_emp_rec.job_id, v_emp_rec.manager_id, v_emp_rec.hire_date,SYSDATE - 1, v_emp_rec.salary, v_emp_rec.commission_pct, v_emp_rec.department_id);
+
+
+DBMS_OUTPUT.PUT_LINE(v_emp_rec.employee_id);
+
+END;
+/
+
+SELECT * FROM Retired_emps;
+
+----- Practice 6 - Q4
+
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ 
+ACCEPT  stunum  PROMPT 'Please provide the student number: '
+DECLARE
+ 
+      TYPE name_type IS RECORD(
+      fname VARCHAR2(20),
+      lname VARCHAR2(20)
+      );
+      
+      TYPE address_type IS RECORD(
+      zip VARCHAR2(20),
+      city VARCHAR2(20)
+      );
+      
+      TYPE person_type IS RECORD(
+      name NAME_TYPE,
+      address ADDRESS_TYPE
+      );
+      
+      Person_rec PERSON_TYPE;
+BEGIN
+    SELECT first_name, last_name, zipcode.zip, city 
+    INTO Person_rec.name.fname, Person_rec.name.lname, Person_rec.address.zip, Person_rec.address.city
+    FROM Student, Zipcode
+    WHERE Zipcode.zip = Student.zip
+    AND student_id = &stunum;
+   
+  DBMS_OUTPUT.PUT_LINE('Full name is  : ' || Person_rec.name.fname || ' ' || Person_rec.name.lname);
+  
+  DBMS_OUTPUT.PUT_LINE('Full address is  : ' ||  Person_rec.address.zip || ' ' || Person_rec.address.city );
+
+END;
+/
+
+---- Practice 6 - Q5
+
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ 
+ACCEPT  dep_name  PROMPT 'Please provide the first letter of department name: '
+DECLARE
+ 
+ TYPE depart_table_type IS TABLE OF Departments%ROWTYPE
+ INDEX BY BINARY_INTEGER;
+ 
+ depAart_table DEPART_TABLE_TYPE;
+ 
+ v_found_num NUMBER(3) := 0;
+ 
+ v_counter NUMBER(3) := 0;
+ 
+BEGIN
+
+    SELECT COUNT(*)
+    INTO   v_found_num
+    FROM Departments
+    WHERE department_name LIKE '&dep_name%';
+   
+  DBMS_OUTPUT.PUT_LINE('Number of found rows ' || v_found_num);
+  
+    FOR i IN 1.. v_found_num LOOP
+        
+        v_counter := v_counter +1;
+        
+        SELECT * 
+        INTO  depAart_table(v_counter)
+        FROM Departments
+        WHERE department_name LIKE '&dep_name%';
+        
+        DBMS_OUTPUT.PUT_LINE(v_counter || ' row starts with typed letter which is ' || depAart_table(v_counter).department_name);
+    END LOOP;
+    
+END;
+/
+
+
+ 
+SET  SERVEROUTPUT ON
+SET  VERIFY OFF
+ 
+ACCEPT  stu_id  PROMPT 'Please provide highest student id : '
+DECLARE
+ 
+ CURSOR c_stud_cursor IS SELECT first_name, last_name
+    FROM Student
+    WHERE student_id <= &stu_id
+    ORDER BY last_name;
+    
+    v_stu_rec Student%ROWTYPE;
+    
+BEGIN
+    OPEN c_stud_cursor;
+    LOOP
+        FETCH c_stud_cursor INTO v_stu_rec;
+        EXIT WHEN c_stud_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(q'{Student's full name is }' || v_stu_rec.first_name );
+   
+   
+    END LOOP;
+ 
+    
+END;
+/
+
+ 
+
+-------------------
+
+SET VERIFY OFF
+DECLARE
+v_employee_number number:= 124;
+v_emp_rec retired_emps%ROWTYPE;
+BEGIN
+SELECT * INTO v_emp_rec FROM retired_emps
+WHERE
+empno=v_employee_number;
+v_emp_rec.leavedate:=CURRENT_DATE;
+UPDATE retired_emps SET ROW = v_emp_rec WHERE
+empno=v_employee_number;
+END;
+
+-------------------
+
+SET SERVEROUTPUT ON;
+SET VERIFY OFF
+
+ACCEPT new_dep PROMPT 'ENter a city for the new dapartment : '
+VARIABLE b_city VARCHAR2(20);
+
+DECLARE
+
+v_new_dep_id NUMBER;
+v_most_emp_mgn_id NUMBER;
+v_big_mng_id NUMBER;
+v_exist_loc NUMBER;
+v_new_city VARCHAR2(20):= '&new_dep';
+v_loc_id NUMBER;
+
+BEGIN
+
+
+SELECT MAX(Department_id)
+INTO v_new_dep_id
+FROM Departments;
+
+v_new_dep_id := v_new_dep_id +50;
+
+-- DBMS_OUTPUT.PUT_LINE('Highest dep_id is ' || v_new_dep_id);
+
+SELECT MAX(COUNT(manager_id))
+INTO v_most_emp_mgn_id
+FROM Employees
+GROUP BY manager_id;
+
+-- DBMS_OUTPUT.PUT_LINE('Most emp number ' || v_most_emp_mgn_id);
+
+SELECT manager_id
+INTO  v_big_mng_id
+FROM Employees
+GROUP BY manager_id
+        HAVING count(manager_id) = ( SELECT MAX(COUNT(manager_id)) 
+                                    FROM employees
+                                    GROUP BY manager_id);
+
+-- DBMS_OUTPUT.PUT_LINE('Manager id is ' || v_big_mng_id);
+
+SELECT location_id
+INTO v_loc_id
+FROM Locations
+WHERE city = v_new_city;
+
+SELECT COUNT(*) 
+INTO v_exist_loc
+FROM Departments
+JOIN Locations
+ON Departments.location_id = Locations.location_id
+WHERE city = v_new_city;
+
+:b_city := v_new_city;
+
+DBMS_OUTPUT.PUT_LINE('Manager id is ' || v_loc_id);
+
+IF v_exist_loc = 0 THEN
+INSERT INTO Departments(Department_id, Department_name, Manager_id, Location_id) 
+VALUES(v_new_dep_id, 'Testing', v_big_mng_id, v_loc_id);
+
+    
+ELSIF v_exist_loc > 1 THEN
+
+    DBMS_OUTPUT.PUT_LINE('This city has MORE THAN ONE department:' || v_new_city);
+    
+    
+ELSE 
+    DBMS_OUTPUT.PUT_LINE('This city already contains department: ' || v_new_city);
+ --   CONTINUE;
+    
+END IF;
+
+EXCEPTION
+  WHEN no_data_found THEN
+     DBMS_OUTPUT.PUT_LINE('This city is NOT listed: ' || v_new_city);
+
+END;
+/
+
+SELECT * FROM Departments
+WHERE location_id = (SELECT location_id
+                        FROM Locations
+                        WHERE city = :b_city);
+                        
+Rollback;
+/
+
+
+--------------------
+
+
+
+SET SERVEROUTPUT ON;
+SET VERIFY OFF
+
+ACCEPT new_dep PROMPT 'ENter a city for the new dapartment : '
+VARIABLE b_city VARCHAR2(20);
+
+DECLARE
+
+v_new_dep_id NUMBER;
+v_most_emp_mgn_id NUMBER;
+v_big_mng_id NUMBER;
+v_exist_loc NUMBER;
+v_new_city VARCHAR2(20):= '&new_dep';
+v_loc_id NUMBER;
+
+BEGIN
+
+
+SELECT MAX(Department_id)
+INTO v_new_dep_id
+FROM Departments;
+
+v_new_dep_id := v_new_dep_id +50;
+
+-- DBMS_OUTPUT.PUT_LINE('Highest dep_id is ' || v_new_dep_id);
+
+SELECT MAX(COUNT(manager_id))
+INTO v_most_emp_mgn_id
+FROM Employees
+GROUP BY manager_id;
+
+-- DBMS_OUTPUT.PUT_LINE('Most emp number ' || v_most_emp_mgn_id);
+
+SELECT manager_id
+INTO  v_big_mng_id
+FROM Employees
+GROUP BY manager_id
+        HAVING count(manager_id) = ( SELECT MAX(COUNT(manager_id)) 
+                                    FROM employees
+                                    GROUP BY manager_id);
+
+-- DBMS_OUTPUT.PUT_LINE('Manager id is ' || v_big_mng_id);
+
+SELECT location_id
+INTO v_loc_id
+FROM Locations
+WHERE city = v_new_city;
+
+SELECT COUNT(*) 
+INTO v_exist_loc
+FROM Departments
+JOIN Locations
+ON Departments.location_id = Locations.location_id
+WHERE city = v_new_city;
+
+:b_city := v_new_city;
+
+DBMS_OUTPUT.PUT_LINE('Manager id is ' || v_loc_id);
+
+IF v_exist_loc = 0 THEN
+
+INSERT INTO Departments(Department_id, Department_name, Manager_id, Location_id) 
+VALUES(v_new_dep_id, 'Testing', v_big_mng_id, v_loc_id);
+
+ELSIF v_exist_loc IS NULL THEN
+
+    DBMS_OUTPUT.PUT_LINE('This city is NOT listed: ' || v_new_city);
+    
+ELSIF v_exist_loc > 1 THEN
+
+    DBMS_OUTPUT.PUT_LINE('This city has MORE THAN ONE department:' || v_new_city);
+    
+ELSE 
+    DBMS_OUTPUT.PUT_LINE('This city already contains department: ' || v_new_city);
+ --   CONTINUE;
+    
+END IF;
+
+END;
+/
+
+SELECT * FROM Departments
+WHERE department_name = 'Testing';
+                        
+Rollback;

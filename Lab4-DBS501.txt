@@ -1,0 +1,709 @@
+
+SET SERVEROUTPUT ON;
+
+PL\SQL Stored Procedure:
+
+-- 
+
+
+/* creates a procedure name Hi_Sali */
+CREATE OR REPLACE PROCEDURE HI_SALI AS 
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Say Hi to new me who gonna do anything');
+END HI_SALI;
+
+/* How you run it */
+
+EXECUTE Hi_Sali;
+
+
+------------------
+
+CREATE OR REPLACE PROCEDURE MINE
+(p_visa_exp VARCHAR2, 
+p_letter VARCHAR2) AS 
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Say Hi to ' || p_visa_exp || ' who gonna do anything. ' || ' ' || p_letter);
+END MINE;
+
+------------------
+CREATE OR REPLACE PROCEDURE raise_salary
+(p_id IN employees.employee_id%TYPE,
+p_percent IN NUMBER)
+IS
+BEGIN
+UPDATE employees
+SET salary = salary * (1 + p_percent/100)
+WHERE employee_id = p_id;
+END raise_salary;
+
+
+
+SET SERVEROUTPUT ON;
+
+EXECUTE raise_salary(54, 5);
+
+
+***************
+
+SELECT COUNT(*)
+FROM user_objects
+WHERE object_type = 'FUNCTION';
+
+
+*****************
+
+
+----------------------
+
+CREATE OR REPLACE PROCEDURE MINE
+(p_visa_exp VARCHAR2, 
+p_letter VARCHAR2) AS 
+
+lastday VARCHAR2(10);
+num NUMBER;
+
+BEGIN
+    -- DBMS_OUTPUT.PUT_LINE('Say Hi to ' || p_visa_exp || ' who gonna do anything. ' || ' ' || p_letter);
+
+    SELECT TO_CHAR(LAST_DAY(TO_DATE(input_date, 'MM/YY')),'Day') INTO lastday FROM dual;
+    DBMS_OUTPUT.PUT_LINE('Last day of the month ' || p_visa_exp || ' is ' ||lastday);
+  
+  IF (p_letter = 'P') THEN
+    DBMS_OUTPUT.PUT_LINE('P');
+	SELECT COUNT(*) INTO num FROM user_objects WHERE UPPER(object_type)='PROCEDURE';
+
+  ELSIF(p_letter = 'F') THEN
+    DBMS_OUTPUT.PUT_LINE('F');
+	SELECT COUNT(*) INTO num FROM user_objects WHERE UPPER(object_type)='FUNCTION';
+  ELSIF(p_letter = 'B') THEN
+    DBMS_OUTPUT.PUT_LINE('B');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('You have entered an Invalid letter for the stored object. Try P, F or B. ');
+    END IF;
+    
+END MINE;
+
+------
+
+
+2------
+
+
+
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip Zipcode.zip%TYPE,
+  p_city Zipcode.city%TYPE,
+  p_state Zipcode.state%TYPE, FLAG OUT VARCHAR2, v_count_state OUT NUMBER) AS 
+  
+  v_count_zip NUMBER(3);
+
+ 
+  ex_exist EXCEPTION;
+--    v_count_state NUMBER(3);
+--   FLAG VARCHAR2(10) := 'FAILURE';
+  
+BEGIN
+ 
+   
+   
+  SELECT COUNT(*) 
+  INTO v_count_state
+  FROM Zipcode 
+  WHERE state = p_state;
+ 
+ DBMS_OUTPUT.PUT_LINE('You NUMBER OF STATE  ' || v_count_state );
+ 
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  DBMS_OUTPUT.PUT_LINE('You entered ' || p_zip || ' NUMBER OF RECORD ' || v_count_zip );
+  
+  IF v_count_zip = 1 THEN
+  FLAG := 'FAILURE';
+  
+   RAISE ex_exist;
+   ELSE
+   FLAG :=  'SUCCESS ';
+    DBMS_OUTPUT.PUT_LINE('ADD A ROW. ' );
+    INSERT INTO ZIPCODE 
+    VALUES(p_zip, p_city, p_state, USER, SYSDATE, USER, SYSDATE);
+  END IF;
+  
+  EXCEPTION
+  WHEN ex_exist THEN
+    DBMS_OUTPUT.PUT_LINE('This ZIPCODE ' || p_zip || ' is already in the Dataase. Try again. ' );
+   
+END ADD_ZIP;
+
+
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI';
+
+
+
+
+
+--------------------------------
+
+
+SELECT  * FROM zipcode
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+------
+
+
+
+SET SERVEROUTPUT ON;
+
+VARIABLE FLAG VARCHAR2(10);
+VARIABLE ZIPNUM  NUMBER;
+
+EXECUTE ADD_ZIP(48104, 'Chicago', 'MI', :FLAG, :ZIPNUM); 
+PRINT FLAG ZIPNUM;
+
+
+
+------------------------------------
+
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip Zipcode.zip%TYPE,
+  p_city Zipcode.city%TYPE,
+  p_state Zipcode.state%TYPE ) AS 
+  
+  zip_rec Zipcode%ROWTYPE;
+BEGIN
+ 
+
+  SELECT * 
+  INTO zip_rec
+  FROM Zipcode 
+  WHERE zip = 01247;
+  
+   DBMS_OUTPUT.PUT_LINE('You entered ' || p_zip || ' for zip code in the city ' || zip_rec.city || ' located in ' || zip_rec.state );
+   
+END ADD_ZIP;
+
+
+
+BEGIN
+EXECUTE RAISE_SALARY(176, 10);
+END;
+/
+----------------------
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip Zipcode.zip%TYPE,
+  p_city Zipcode.city%TYPE,
+  p_state Zipcode.state%TYPE ) AS 
+  
+  zip_rec Zipcode%ROWTYPE;
+  v_count_zip NUMBER(3);
+  v_count_state NUMBER(3);
+  ex_exist EXCEPTION;
+  
+  SUCCESS BOOLEAN := TRUE;
+  FAILURE BOOLEAN := FALSE;
+BEGIN
+ 
+
+  SELECT COUNT(*) 
+  INTO v_count_state
+  FROM Zipcode 
+  WHERE state = p_state;
+ 
+ DBMS_OUTPUT.PUT_LINE('You NUMBER OF STATE  ' || v_count_state );
+ 
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  DBMS_OUTPUT.PUT_LINE('You entered ' || p_zip || ' NUMBER OF RECORD ' || v_count_zip );
+  
+  IF v_count_zip = 1 THEN
+   RAISE ex_exist;
+   ELSE
+    DBMS_OUTPUT.PUT_LINE('ADD A ROW. ' );
+    INSERT INTO ZIPCODE 
+    VALUES(p_zip, p_city, p_state, USER, SYSDATE, USER, SYSDATE);
+  END IF;
+  
+  EXCEPTION
+  WHEN ex_exist THEN
+    DBMS_OUTPUT.PUT_LINE('This ZIPCODE ' || p_zip || ' is already in the Dataase. Try again. ' );
+   
+END ADD_ZIP;
+
+
+
+-----------------------------
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('p_first_name is ' || p_first_name || ' p_last_name is ' || p_last_name);
+  RETURN NULL;
+END INSTRUCT_STATUS;
+
+
+
+----------------------------------------
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+   rec_ins Instructor%ROWTYPE; 
+   v_num_ins NUMBER(3) := 0;
+   v_num_crs NUMBER(3) := 0;
+  
+BEGIN
+ 
+   
+    SELECT COUNT(*) 
+    INTO v_num_ins
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_num_ins = 0 THEN
+     RETURN  'There is NO such instructor.';
+
+
+
+   ELSE THEN
+    SELECT instructor_id 
+    INTO rec_ins
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+   
+  DBMS_OUTPUT.PUT_LINE('p_first_name is ' || rec_ins.first_name || ' p_last_name is ' || rec_ins.last_name);
+
+   SELECT COUNT(*) 
+    INTO v_num_crs
+    FROM Section
+    WHERE   
+    AND last_name = p_last_name;
+  
+    END IF;
+
+
+  
+
+  RETURN 'YES';
+END INSTRUCT_STATUS;
+/
+
+
+BEGIN
+ DBMS_OUTPUT.PUT_LINE(INSTRUCT_STATUS( 'Rick' , 'Chow'));
+END;
+---------------------
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+   rec_ins Instructor%ROWTYPE; 
+   v_num_ins NUMBER(3) := 0;
+   v_num_crs NUMBER(3) := 0;
+   v_ins_id NUMBER(3) := 0;
+  
+BEGIN
+ 
+   
+    SELECT instructor_id 
+    INTO v_ins_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_num_ins = 0 THEN
+     RETURN  'There is NO such instructor.';
+
+
+
+   ELSE THEN
+    SELECT instructor_id 
+    INTO rec_ins
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+   
+  DBMS_OUTPUT.PUT_LINE('p_first_name is ' || rec_ins.first_name || ' p_last_name is ' || rec_ins.last_name);
+
+   SELECT COUNT(*) 
+    INTO v_num_crs
+    FROM Section
+    WHERE instructor_id = rec_ins;
+  
+    END IF;
+
+
+  
+
+  RETURN 'YES';
+END INSTRUCT_STATUS;
+/
+
+
+BEGIN
+ DBMS_OUTPUT.PUT_LINE(INSTRUCT_STATUS( 'Rick' , 'Chow'));
+END;
+
+
+SELECT last_name, INSTRUCT_STATUS(last_name, first_name) "Instructor Status"
+FROM Instructor;
+
+
+
+
+
+
+
+----------------
+
+
+
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+  -- rec_ins Instructor%ROWTYPE;
+  
+   v_ins_id NUMBER(3);
+   v_num_sec NUMBER(3) := 0;
+  
+BEGIN
+  
+    SELECT instructor_id 
+    INTO  v_ins_id
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_ins_id = 0 THEN
+    RETURN 'There is NO such instructor.';
+
+  ELSE  
+    SELECT COUNT(*) 
+    INTO v_num_sec
+    FROM Section 
+    WHERE  instructor_id = v_ins_id;
+  
+  END IF;
+
+  DBMS_OUTPUT.PUT_LINE('v_ins_id is ' || v_ins_id);
+
+  DBMS_OUTPUT.PUT_LINE('v_num_sec is ' || v_num_sec);
+ 
+
+  RETURN 'This Instructor will teach ' || v_num_sec || ' course and needs a vacation ';
+END INSTRUCT_STATUS;
+/
+
+
+BEGIN
+ DBMS_OUTPUT.PUT_LINE(INSTRUCT_STATUS( 'Rick' , 'Chow'));
+END;
+--------------------+
+
+
+
+
+    SELECT instructor_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = 'Rick'
+    AND last_name = 'Chow';
+------------------------------
+
+SELECT * FROM Instructor
+WHERE last_name = 'Chow';
+
+
+-----------------------
+
+
+
+  SELECT COUNT(*)
+  FROM user_objects
+  WHERE object_type = 'FUNCTION';
+
+
+    SELECT * 
+    FROM INSTRUCTOR 
+    WHERE last_name = 'Frantzen';
+ 
+
+
+    SELECT instructor_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = 'Rick'
+    AND last_name = 'Chow';
+    
+    
+    SELECT instructor_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = 'Marilyn'
+    AND last_name = 'Frantzen';
+    
+ 
+    SELECT COUNT(*) 
+    FROM Section
+    WHERE instructor_id = 107;
+
+
+---------------------------
+
+
+
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+  -- rec_ins Instructor%ROWTYPE;
+  
+   v_ins_id NUMBER(3);
+   v_num_sec NUMBER(3) := 0;
+  
+BEGIN
+  
+    SELECT instructor_id 
+    INTO  v_ins_id
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_ins_id = 0 THEN
+    RETURN 'There is NO such instructor.';
+
+  ELSE  
+    SELECT COUNT(*) 
+    INTO  v_num_sec
+    FROM Section 
+    WHERE  instructor_id = v_ins_id;
+  
+  END IF;
+
+  IF v_num_sec = 0 THEN 
+     RETURN 'This Instructor is NOT scheduled to teach '; 
+     
+  ELSIF v_num_sec > 0 AND v_num_sec < 10  THEN
+     RETURN 'This Instructor will teach ' || v_num_sec || ' courses. ';
+
+  ELSE
+     RETURN 'This Instructor will teach ' || v_num_sec || ' course and needs a vacation ';
+  END IF;
+  
+END INSTRUCT_STATUS;
+/
+
+-----
+
+
+BEGIN
+ DBMS_OUTPUT.PUT_LINE(INSTRUCT_STATUS( 'Rick' , 'Chow'));
+END;
+
+----------------
+
+SELECT last_name, INSTRUCT_STATUS(first_name, last_name) "Instructor Status"
+FROM Instructor
+ORDER BY last_name;
+
+
+-------------------------------
+
+
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip Zipcode.zip%TYPE,
+  p_city Zipcode.city%TYPE,
+  p_state Zipcode.state%TYPE, FLAG OUT VARCHAR2, v_count_state OUT NUMBER) AS 
+  
+  v_count_zip NUMBER(3);
+
+ 
+  ex_exist EXCEPTION;
+--    v_count_state NUMBER(3);
+--   FLAG VARCHAR2(10) := 'FAILURE';
+  
+BEGIN
+ 
+   
+   
+  SELECT COUNT(*) 
+  INTO v_count_state
+  FROM Zipcode 
+  WHERE state = p_state;
+ 
+ DBMS_OUTPUT.PUT_LINE('You NUMBER OF STATE  ' || v_count_state );
+ 
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  DBMS_OUTPUT.PUT_LINE('You entered ' || p_zip || ' NUMBER OF RECORD ' || v_count_zip );
+  
+  IF v_count_zip = 1 THEN
+  FLAG := 'FAILURE';
+  
+   RAISE ex_exist;
+   ELSE
+   FLAG :=  'SUCCESS ';
+    DBMS_OUTPUT.PUT_LINE('ADD A ROW. ' );
+    INSERT INTO ZIPCODE 
+    VALUES(p_zip, p_city, p_state, USER, SYSDATE, USER, SYSDATE);
+  END IF;
+  
+  EXCEPTION
+  WHEN ex_exist THEN
+    DBMS_OUTPUT.PUT_LINE('This ZIPCODE ' || p_zip || ' is already in the Dataase. Try again. ' );
+   
+END ADD_ZIP;
+
+
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+
+
+BEGIN
+EXECUTE ADD_ZIP(176, 10);
+END;
+/
+
+
+------------------------
+
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+  -- rec_ins Instructor%ROWTYPE;
+  
+   v_ins_id NUMBER(3);
+   v_num_sec NUMBER(3) := 0;
+  
+BEGIN
+  
+    SELECT instructor_id 
+    INTO  v_ins_id
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_ins_id = 0 THEN
+    RETURN 'There is NO such instructor.';
+
+  ELSE  
+    SELECT COUNT(*) 
+    INTO  v_num_sec
+    FROM Section 
+    WHERE  instructor_id = v_ins_id;
+  
+  END IF;
+
+  IF v_num_sec = 0 THEN 
+     RETURN 'This Instructor is NOT scheduled to teach '; 
+     
+  ELSIF v_num_sec > 0 AND v_num_sec < 10  THEN
+     RETURN 'This Instructor will teach ' || v_num_sec || ' courses. ';
+
+  ELSE
+     RETURN 'This Instructor will teach ' || v_num_sec || ' course and needs a vacation ';
+  END IF;
+  
+END INSTRUCT_STATUS;
+/
+
+BEGIN
+ DBMS_OUTPUT.PUT_LINE(INSTRUCT_STATUS( 'Rick' , 'Chow'));
+END;
+
+
+-----------------------------
+
+
+SELECT last_name, INSTRUCT_STATUS(first_name, last_name) "Instructor Status"
+FROM Instructor
+ORDER BY last_name;
+
+
+---------------------------
+
+
+
+
+SELECT COUNT(*)
+FROM user_objects
+WHERE object_type = 'FUNCTION';
+
+
+    SELECT * 
+    FROM INSTRUCTOR 
+    WHERE last_name = 'Frantzen';
+ 
+
+
+    SELECT instructor_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = 'Rick'
+    AND last_name = 'Chow';
+    
+    
+    SELECT instructor_id 
+    FROM INSTRUCTOR 
+    WHERE  first_name = 'Marilyn'
+    AND last_name = 'Frantzen';
+    
+ 
+    SELECT COUNT(*) 
+    FROM Section
+    WHERE instructor_id = 107;
+    
+
+
+
+

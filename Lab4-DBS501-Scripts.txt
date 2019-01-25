@@ -1,0 +1,369 @@
+
+Salimeh Safi                                    DBS501
+
+--------------------   Q1
+
+CREATE OR REPLACE PROCEDURE MINE
+(p_visa_exp VARCHAR2, 
+p_letter VARCHAR2) AS 
+
+v_lastday VARCHAR2(10);
+num NUMBER;
+
+BEGIN
+    -- DBMS_OUTPUT.PUT_LINE('Say Hi to ' || p_visa_exp || ' who gonna do anything. ' || ' ' || p_letter);
+
+    SELECT TO_CHAR(LAST_DAY(TO_DATE(p_visa_exp, 'MM/YY')),'Day') INTO v_lastday FROM dual;
+    DBMS_OUTPUT.PUT_LINE('Last day of the month ' || p_visa_exp || ' is ' || v_lastday);
+  
+  IF (p_letter = 'P' OR p_letter = 'p') THEN
+     
+	SELECT COUNT(*) INTO num FROM user_objects WHERE UPPER(object_type)='PROCEDURE';
+	DBMS_OUTPUT.PUT_LINE('Number of stored objects of type '|| p_letter ||' is '||num);
+
+  ELSIF(p_letter = 'F' OR p_letter = 'f') THEN
+
+	SELECT COUNT(*) INTO num FROM user_objects WHERE UPPER(object_type)='FUNCTION';
+	DBMS_OUTPUT.PUT_LINE('Number of stored objects of type '|| p_letter ||' is '||num);
+
+  ELSIF(p_letter = 'B' OR p_letter = 'b') THEN
+    
+	SELECT COUNT(*) INTO num FROM user_objects WHERE UPPER(object_type)='PACKAGE BODY';
+	DBMS_OUTPUT.PUT_LINE('Number of stored objects of type '|| p_letter ||' is '||num);
+
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('You have entered an Invalid letter for the stored object. Try P, F or B. ');
+    END IF;
+    
+   Exception
+	WHEN others THEN
+	     DBMS_OUTPUT.PUT_LINE('You have entered an Invalid FORMAT for the MONTH and YEAR. Try MM/YY. ');
+
+END MINE;
+
+
+
+
+Entered:
+
+EXECUTE  mine ('11/09','P');
+
+Output:
+Number of stored objects of type P is 14
+
+
+Entered:
+EXECUTE  mine ('12/09','f');
+
+Output:
+
+
+
+
+--------------------   Q2
+
+-- add_zip is a procedure which is supposed to recieve 3 input paramaters - ZIPCODE (ZIP, CITY and STATE)
+
+-- If the inputed ZIP alreay exists - adding process stops
+
+-- Else the procedure adds a new row to the ZIPCODE table. Other missing parameters are entered as "USER" and "SYSDATE" 
+
+-- The procedure also uses two OUT parameters to display messages for FLAG and ROWNUMS for the entered STATE
+
+-- Use bind variables for dispalying the messages 
+
+-- Roll back changes when the Insert is successful
+
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip IN Zipcode.zip%TYPE,
+    p_city IN Zipcode.city%TYPE,
+    p_state IN Zipcode.state%TYPE, 
+    FLAG OUT VARCHAR2, 
+    v_count_state OUT NUMBER) AS 
+    -- number of city(s) for one state
+    
+   -- number of rows for 1 zipcode
+    v_count_zip NUMBER(3);
+
+    -- exception for already existing zipcode
+    ex_exist EXCEPTION;
+  
+BEGIN
+
+ 
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  IF v_count_zip = 1 THEN
+ 	 FLAG := 'FAILURE';
+ --  RAISE ex_exist;
+  ELSE
+      FLAG :=  'SUCCESS ';
+  	  INSERT INTO ZIPCODE 
+   	  VALUES(p_zip, p_city, p_state, USER, SYSDATE, USER, SYSDATE);
+  END IF;
+  
+     
+-- counts the number of city(s) in a specified State 
+  SELECT COUNT(*) 
+  INTO v_count_state
+  FROM Zipcode 
+  WHERE state = p_state;
+ 
+  EXCEPTION
+  WHEN ex_exist THEN
+    DBMS_OUTPUT.PUT_LINE('This ZIPCODE ' || p_zip || ' is already in the Database. Try again. ' );
+   
+END ADD_ZIP;
+/
+
+
+
+
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+Output : 
+48104	Ann Arbor	MI	AMORRISO	99-08-03	ARISCHER	99-11-24
+----------------------------------------------------------------------------------------------------------
+
+SET SERVEROUTPUT ON;
+VARIABLE FLAG VARCHAR2(10);
+VARIABLE ZIPNUM  NUMBER;
+EXECUTE ADD_ZIP(18104 , 'Chicago', 'MI', :FLAG, :ZIPNUM); 
+PRINT FLAG ZIPNUM;
+
+
+Output : 
+FLAG
+-----------------------------------------------------------------
+SUCCESS 
+
+    ZIPNUM
+----------
+         2
+--------------------------------------------------------------------------------------------------------------
+
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+Output : 
+
+48104	Ann Arbor	MI	AMORRISO	99-08-03	ARISCHER	99-11-24
+18104	Chicago	MI	DBS501_183A32	18-11-15	DBS501_183A32	18-11-15
+
+
+
+SET SERVEROUTPUT ON;
+VARIABLE FLAG VARCHAR2(10);
+VARIABLE ZIPNUM  NUMBER;
+EXECUTE ADD_ZIP(48104  , 'Chicago', 'MI', :FLAG, :ZIPNUM); 
+PRINT FLAG ZIPNUM;
+
+Output : 
+FLAG
+--------------------------------------------------------------------------------
+FAILURE
+
+    ZIPNUM
+----------
+         2
+
+
+--------------------   Q3
+
+
+
+CREATE OR REPLACE PROCEDURE ADD_ZIP
+  ( p_zip IN Zipcode.zip%TYPE,
+    p_city IN Zipcode.city%TYPE,
+    p_state IN Zipcode.state%TYPE, 
+    FLAG OUT VARCHAR2, 
+    v_count_state OUT NUMBER) AS 
+    -- number of city(s) for one state
+    
+   -- number of rows for 1 zipcode
+    v_count_zip NUMBER(3);
+
+    -- exception for already existing zipcode
+    ex_exist EXCEPTION;
+  
+BEGIN
+
+ 
+  IF exist_zip(p_zip) THEN
+    FLAG := 'FALSE';
+    DBMS_OUTPUT.PUT_LINE('FAILURE');
+  ELSE
+      FLAG := 'TRUE';
+      DBMS_OUTPUT.PUT_LINE('SUCCESS');
+  	  INSERT INTO ZIPCODE 
+   	  VALUES(p_zip, p_city, p_state, USER, SYSDATE, USER, SYSDATE);
+  END IF;
+  
+     
+-- counts the number of city(s) in a specified State 
+  SELECT COUNT(*) 
+  INTO v_count_state
+  FROM Zipcode 
+  WHERE state = p_state;
+ 
+  EXCEPTION
+  WHEN ex_exist THEN
+    DBMS_OUTPUT.PUT_LINE('This ZIPCODE ' || p_zip || ' is already in the Database. Try again. ' );
+   
+END ADD_ZIP;
+/
+
+
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+
+Output:
+
+48104	Ann Arbor	MI	AMORRISO	03-AUG-99	ARISCHER	24-NOV-99
+
+
+--------------
+
+SET SERVEROUTPUT ON;
+VARIABLE FLAG VARCHAR2(10);
+VARIABLE ZIPNUM  NUMBER;
+EXECUTE ADD_ZIP(18104  , 'Chicago', 'MI', :FLAG, :ZIPNUM); 
+PRINT FLAG ZIPNUM;
+
+
+Output: 
+
+FLAG
+----
+TRUE
+    ZIPNUM
+----------
+         2
+
+
+--- Then
+
+SELECT  * FROM zipcode
+WHERE  state = 'MI'
+
+
+Output:
+48104	Ann Arbor	MI	AMORRISO	03-AUG-99	ARISCHER	24-NOV-99
+18104	Chicago	MI	DBS501_183A32	16-NOV-18	DBS501_183A32	16-NOV-18
+
+--------------------
+
+
+CREATE OR REPLACE FUNCTION exist_zip
+  ( p_zip VARCHAR2) 
+    RETURN BOOLEAN IS
+    
+    FLAG BOOLEAN := FALSE; 
+    
+    -- number of rows for 1 zipcode
+    v_count_zip NUMBER(3);
+
+    -- exception for already existing zipcode
+    ex_exist EXCEPTION;
+    
+BEGIN
+ 
+  SELECT COUNT(*) 
+  INTO v_count_zip
+  FROM Zipcode 
+  WHERE zip = p_zip;
+  
+  IF v_count_zip = 0 THEN
+     DBMS_OUTPUT.PUT_LINE('No record is found. Good');
+     RETURN FLAG;
+ --   RAISE ex_exist;
+ 
+  ELSE
+      -- FLAG :=  TRUE;
+      RETURN TRUE;
+  END IF;
+
+END exist_zip;
+/
++++++++++++++++++++++++++
+
+BEGIN
+  IF (exist_zip(11106)) THEN
+ DBMS_OUTPUT.PUT_LINE('TRUE');
+ ELSE 
+ DBMS_OUTPUT.PUT_LINE('FALSE');
+ END IF;
+END;
+
+--------------------   Q4
+
+
+CREATE OR REPLACE FUNCTION INSTRUCT_STATUS
+(p_first_name Instructor.first_name%TYPE,
+p_last_name Instructor.last_name%TYPE)
+RETURN VARCHAR2 AS 
+
+  -- rec_ins Instructor%ROWTYPE;
+  
+   v_ins_id NUMBER(3);
+   v_num_sec NUMBER(3) := 0;
+  
+BEGIN
+  
+    SELECT instructor_id 
+    INTO  v_ins_id
+    FROM INSTRUCTOR 
+    WHERE  first_name = p_first_name
+    AND last_name = p_last_name;
+  
+  IF v_ins_id = 0 THEN
+    RETURN 'There is NO such instructor.';
+
+  ELSE  
+    SELECT COUNT(*) 
+    INTO  v_num_sec
+    FROM Section 
+    WHERE  instructor_id = v_ins_id;
+  
+  END IF;
+
+  IF v_num_sec = 0 THEN 
+     RETURN 'This Instructor is NOT scheduled to teach '; 
+     
+  ELSIF v_num_sec > 0 AND v_num_sec < 10  THEN
+     RETURN 'This Instructor will teach ' || v_num_sec || ' courses. ';
+
+  ELSE
+     RETURN 'This Instructor will teach ' || v_num_sec || ' course and needs a vacation ';
+  END IF;
+  
+END INSTRUCT_STATUS;
+/
+
+-----------------
+
+SELECT last_name, INSTRUCT_STATUS(first_name, last_name) "Instructor Status"
+FROM Instructor
+ORDER BY last_name;
+
+Output:
+
+Chow	This Instructor is NOT scheduled to teach 
+Frantzen	This Instructor will teach 10 course and needs a vacation 
+Hanks	This Instructor will teach 9 courses. 
+Lowry	This Instructor will teach 9 courses. 
+Morris	This Instructor will teach 10 course and needs a vacation 
+Pertez	This Instructor will teach 10 course and needs a vacation 
+Schorin	This Instructor will teach 10 course and needs a vacation 
+Smythe	This Instructor will teach 10 course and needs a vacation 
+Willig	This Instructor is NOT scheduled to teach 
+Wojick	This Instructor will teach 10 course and needs a vacation 
